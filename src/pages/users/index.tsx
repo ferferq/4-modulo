@@ -8,23 +8,54 @@ import {
   Text,
   useBreakpointValue,
   IconButton,
-  Spinner
+  Spinner,
+  Link as ChakraLink
 } from "@chakra-ui/react";
 import { RiPencilLine, RiUserAddLine } from "react-icons/ri";
 import { Header } from '../../components/Header'
 import { Sidebar } from "../../components/Sidebar";
 import { Pagination } from "../../components/Pagination"
 import Link from "next/link";
-import { useUsers } from "../../services/hooks/useUsers";
+import { useUsers, getUsers } from "../../services/hooks/useUsers";
+import { useState } from "react";
+import { queryClient } from "../../services/react-query/QueryClient";
+import { api } from "../../services/axios/api";
+//import { GetServerSideProps } from "next";
+
+type User = {
+  id: string,
+  name: string,
+  email: string,
+  createdAt: string,  
+}
+
+interface userListProps {
+  users: User[];
+}
 
 export default function UserList() {
+  const [page, setPage] = useState(1);
   //posso pegar o refetch também que criar um botam e executar esta funcao para fazer um reflash
-  const { data, isLoading, isFetching, error } = useUsers();
+  /*const { data, isLoading, isFetching, error } = useUsers(page, {
+      initialData: users, do props
+  });*/
+  const { data, isLoading, isFetching, error } = useUsers(page);
 
   const isWideVersion = useBreakpointValue({
     base: false,
     lg: true,
   })
+
+  async function handlePrefetchUser(userId: number) {
+    await queryClient.prefetchQuery(['user', userId], async () => {
+      const response = await api.get(`/users/${userId}`)
+      return response.data;
+    }, {
+      staleTime: 1000 * 60 * 10 //10 minutos
+    })
+  }
+  
+  const userNumbers = data && data.users.map(u => {return (Number(u.id))})
 
   return (
     <Box>
@@ -76,7 +107,7 @@ export default function UserList() {
                   </Thead>
                   <Tbody>
                     {
-                      data.map(user => {
+                      data.users.map(user => {
                         return (
                           <Tr key={user.id}>
                             <Td px={["4", "4", "6"]} color="gray.300" width="8">
@@ -84,7 +115,9 @@ export default function UserList() {
                             </Td>
                             <Td>
                               <Box>
-                                <Text fontWeight="bold">{user.name}</Text>
+                                <ChakraLink color='purple.400' onMouseEnter={() => handlePrefetchUser(Number(user.id))}>
+                                  <Text fontWeight="bold">{user.name}</Text>
+                                </ChakraLink>
                                 <Text fontSize="sm" color="gray.300">{user.email}</Text>
                               </Box>
                             </Td>
@@ -124,9 +157,10 @@ export default function UserList() {
                 </Table>
 
                 <Pagination 
-                  totalCountOfRegisters={200}
-                  currentPage={5}
-                  onPageChange={() => {}}
+                  totalCountOfRegisters={data.totalCount}
+                  usersId={userNumbers}
+                  currentPage={page}
+                  onPageChange={setPage}
                 />
               </>
             )
@@ -136,3 +170,15 @@ export default function UserList() {
     </Box>
   )
 }
+
+/*
+export const getServerSideProps: GetServerSideProps = async () => {
+  //const { users, totalCount} = await getUsers(1);
+  const users = {}
+  return { 
+    props: {
+      users,
+    }
+  }
+}*/
+
