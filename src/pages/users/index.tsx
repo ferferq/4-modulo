@@ -18,7 +18,7 @@ import { Pagination } from "../../components/Pagination"
 import Link from "next/link";
 import { useUsers, getUsers } from "../../services/hooks/useUsers";
 import { useState } from "react";
-import { queryClient } from "../../services/react-query/QueryClient";
+import { queryClient } from "../../services/react-query/queryClient";
 import { api } from "../../services/axios/api";
 //import { GetServerSideProps } from "next";
 

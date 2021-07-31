@@ -19,7 +19,7 @@ import { Header } from '../../components/Header'
 import { Sidebar } from "../../components/Sidebar";
 import { Input } from '../../components/Form/Input';
 import { api } from "../../services/axios/api";
-import { queryClient } from "../../services/react-query/QueryClient";
+import { queryClient } from "../../services/react-query/queryClient";
 import { useRouter } from "next/router";
 
 
