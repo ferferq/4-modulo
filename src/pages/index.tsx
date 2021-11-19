@@ -11,7 +11,7 @@ type SignInFormData = {
 }
 
 const signInFormScrema = yup.object().shape({
-  email: yup.string().required('e-mail obrigatório').email('e-mail inválido'),
+  email: yup.string().required('e-mail obrigatório'),
   password: yup.string().required('senha obrigatória'),
 })
 
